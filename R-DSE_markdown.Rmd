@@ -49,7 +49,7 @@ postBaselinePlot <- ggplot(combinedData,
   scale_color_brewer(palette = "Dark2") +
   labs(title = "Postdepolarization baseline", x = "Time (s)",
        y = "Baseline Amplitude (pA)") +
-  theme(plot.title=element_text(hjust=0.5)) +
+  theme(plot.title = element_text(hjust = 0.5)) +
   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                      expand = c(0,0)) +
   scale_y_continuous(limits = c(minBaseline, maxBaseline),
@@ -74,30 +74,7 @@ postBaselinePlot <- ggplot(combinedData,
 ```
 
 ```{r plot-baseline-and-peak}
-plotBasePeak <- function(data, size = 3 , cols = c("black", "magenta")) {
-  
-  lgnd <- c("Baseline" = cols[1], "Peak" = cols[2])
-  prePlot <- ggplot(data, aes(x = Time)) +
-    geom_point(aes(y = PreBaselineAmp, color = "Baseline"), size = size) +
-    geom_point(aes(y = UncorPrePeak, color = "Peak"), shape = 17, size = size) +
-    labs(x = "Time (s)", y = "amplitude (pA)", color = "Legend") +
-    scale_color_manual(values = lgnd) +
-    scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
-                       expand = c(0,0))
-  
-    postPlot <- ggplot(data, aes(x = Time)) +
-    geom_point(aes(y = PostBaselineAmp, color = "Baseline"), size = size) +
-    geom_point(aes(y = UncorPostPeak, color = "Peak"), shape = 17, size = size) +
-    labs(x = "Time (s)", y = "amplitude (pA)", color = "Legend") +
-    scale_color_manual(values = lgnd) +
-    scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
-                       expand = c(0,0))
-    
-    # need to make legend/spacing better
-    BPplot <- plot_grid(prePlot + theme(legend.position = "none"), postPlot)
-  
-  return(BPplot)
-}
+
 
 cell1Plot <- plotBasePeak(as.data.frame(allData$Cell1))
 
