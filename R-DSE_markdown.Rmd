@@ -1,0 +1,104 @@
+---
+title: "R-DSE"
+author: "Benjamin Gansemer"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(message = FALSE)
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(cowplot)
+```
+
+```{r run-dseR}
+source("dseR.R")
+
+allData <- dseR("./example-data/pre-depol-data.atf", 
+             "./example-data/post-depol-data.atf",
+             numSweeps = 60, preAvg = 15, postAvg = 2)
+```
+
+```{r plot-baseline}
+combinedData <- as.data.frame(allData$combined)
+
+allBaseline <- c(combinedData$PreBaselineAmp, combinedData$PostBaselineAmp)
+minBaseline <- round(min(allBaseline), digits = -1)
+maxBaseline <- round(max(allBaseline), digits = -1)
+
+preBaselinePlot <- ggplot(combinedData,
+                   aes(Time, PreBaselineAmp, color = data.frame)) +
+  geom_point() +
+  scale_color_brewer(palette = "Dark2") +
+  labs(title = "Predepolarization baseline", x = "Time (s)",
+       y = "Baseline Amplitude (pA)") +
+  theme(plot.title=element_text(hjust=0.5)) +
+  scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
+                     expand = c(0,0)) +
+  scale_y_continuous(limits = c(minBaseline, maxBaseline),
+                     breaks = seq(minBaseline, maxBaseline, 5),
+                     expand = c(0,0))
+
+postBaselinePlot <- ggplot(combinedData,
+                   aes(Time, PostBaselineAmp, color = data.frame)) +
+  geom_point(shape = 17) +
+  scale_color_brewer(palette = "Dark2") +
+  labs(title = "Postdepolarization baseline", x = "Time (s)",
+       y = "Baseline Amplitude (pA)") +
+  theme(plot.title=element_text(hjust=0.5)) +
+  scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
+                     expand = c(0,0)) +
+  scale_y_continuous(limits = c(minBaseline, maxBaseline),
+                     breaks = seq(minBaseline, maxBaseline, 5),
+                     expand = c(0,0))
+
+# need to figure out combined plot
+# combinedPlot <- ggplot(combinedData, 
+#                        aes(Time, PreBaselineAmp, color = data.frame)) +
+#   geom_point() +
+#   geom_point(aes(Time, PostBaselineAmp), color = data.frame, shape = 1) +
+#   scale_color_manual(values = c("magenta", "blue", "green", "orange")) +
+#   labs(title = "Prestimulus baseline", x = "Time (s)",
+#        y = "Baseline Amplitude (pA)") +
+#   theme(plot.title=element_text(hjust=0.5)) +
+#   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
+#                      expand = c(0,0)) +
+#   scale_y_continuous(limits = c(minBaseline, maxBaseline),
+#                      breaks = seq(minBaseline, maxBaseline, 5),
+#                      expand = c(0,0))
+
+```
+
+```{r plot-baseline-and-peak}
+plotBasePeak <- function(data, size = 3 , cols = c("black", "magenta")) {
+  
+  lgnd <- c("Baseline" = cols[1], "Peak" = cols[2])
+  prePlot <- ggplot(data, aes(x = Time)) +
+    geom_point(aes(y = PreBaselineAmp, color = "Baseline"), size = size) +
+    geom_point(aes(y = UncorPrePeak, color = "Peak"), shape = 17, size = size) +
+    labs(x = "Time (s)", y = "amplitude (pA)", color = "Legend") +
+    scale_color_manual(values = lgnd) +
+    scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
+                       expand = c(0,0))
+  
+    postPlot <- ggplot(data, aes(x = Time)) +
+    geom_point(aes(y = PostBaselineAmp, color = "Baseline"), size = size) +
+    geom_point(aes(y = UncorPostPeak, color = "Peak"), shape = 17, size = size) +
+    labs(x = "Time (s)", y = "amplitude (pA)", color = "Legend") +
+    scale_color_manual(values = lgnd) +
+    scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
+                       expand = c(0,0))
+    
+    # need to make legend/spacing better
+    BPplot <- plot_grid(prePlot + theme(legend.position = "none"), postPlot)
+  
+  return(BPplot)
+}
+
+cell1Plot <- plotBasePeak(as.data.frame(allData$Cell1))
+
+```
