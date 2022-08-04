@@ -2,17 +2,21 @@
 title: "Add experiment title here"
 author: "Benjamin Gansemer"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(message = FALSE)
+knitr::opts_chunk$set(message = FALSE, fig.height = 5)
 ```
 
 ```{r libraries, include = FALSE}
 library(ggplot2)
 library(dplyr)
 library(cowplot)
+library(gridExtra)
 ```
 
 ```{r source, include = FALSE}
@@ -26,7 +30,7 @@ theme_BG <- function(base_size = 14){
   theme_bw(base_size = base_size) %+replace%
     theme(
       plot.title = element_text(size = rel(1), face = "bold",
-                                margin = margin(0,0,5,0), 
+                                margin = margin(0,0,5,0),
                                 hjust = 0.5),
       panel.border = element_blank(),
       axis.line = element_line(color = "black"),
@@ -35,6 +39,7 @@ theme_BG <- function(base_size = 14){
       legend.title = element_text(size = rel(0.7)),
       legend.text = element_text(size = rel(0.6)),
     )
+
 }
 
 ```
@@ -46,6 +51,7 @@ allData <- dseR("./example-data/pre-depol-data.atf",
              numSweeps = 60, preAvg = 15, postAvg = 2)
 ```
 
+## Prestimulus baseline amplitude for all cells
 ```{r plot-baseline, echo = FALSE}
 combinedData <- as.data.frame(allData$combined)
 
@@ -55,54 +61,59 @@ maxBaseline <- round(max(allBaseline), digits = -1) + 5
 
 preBaselinePlot <- ggplot(combinedData,
                    aes(Time, PreBaselineAmp, color = data.frame)) +
-  geom_point() +
+  geom_point(size = 2) +
   scale_color_brewer(palette = "Dark2") +
   labs(title = "Predepolarization baseline", x = "Time (s)",
        y = "Baseline Amplitude (pA)") +
-  theme(plot.title=element_text(hjust=0.5)) +
+  theme_BG() +
   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                      expand = c(0,0)) +
   scale_y_continuous(limits = c(minBaseline, maxBaseline),
-                     breaks = seq(minBaseline, maxBaseline, 5),
+                     breaks = seq(minBaseline, maxBaseline, 10),
                      expand = c(0,0))
 
 postBaselinePlot <- ggplot(combinedData,
                    aes(Time, PostBaselineAmp, color = data.frame)) +
-  geom_point(shape = 17) +
+  geom_point(size = 2) +
   scale_color_brewer(palette = "Dark2") +
   labs(title = "Postdepolarization baseline", x = "Time (s)",
        y = "Baseline Amplitude (pA)") +
-  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_BG() +
   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                      expand = c(0,0)) +
   scale_y_continuous(limits = c(minBaseline, maxBaseline),
-                     breaks = seq(minBaseline, maxBaseline, 5),
+                     breaks = seq(minBaseline, maxBaseline, 10),
                      expand = c(0,0))
-
-# need to figure out combined plot
-# combinedPlot <- ggplot(combinedData, 
-#                        aes(Time, PreBaselineAmp, color = data.frame)) +
-#   geom_point() +
-#   geom_point(aes(Time, PostBaselineAmp), color = data.frame, shape = 1) +
-#   scale_color_manual(values = c("magenta", "blue", "green", "orange")) +
-#   labs(title = "Prestimulus baseline", x = "Time (s)",
-#        y = "Baseline Amplitude (pA)") +
-#   theme(plot.title=element_text(hjust=0.5)) +
-#   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
-#                      expand = c(0,0)) +
-#   scale_y_continuous(limits = c(minBaseline, maxBaseline),
-#                      breaks = seq(minBaseline, maxBaseline, 5),
-#                      expand = c(0,0))
 
 ```
 
+```{r show-baseline-plots, echo = FALSE, fig.align = "center", fig.cap = "Prestimulus baseline for all cells", fig.height = 3}
+
+tempBase <- plot_grid(preBaselinePlot + theme(legend.position = "none"),
+          postBaselinePlot + theme(legend.position = "none"), 
+          align = "vh", hjust = -1, nrow = 1)
+
+baseLeg <- get_legend(preBaselinePlot + theme_BG() +
+                        guides(color = guide_legend(title = "Cell")))
+
+basePlotGrid <- plot_grid(tempBase, baseLeg, nrow = 1,
+                          rel_widths = c(1, 0.1))
+
+basePlotGrid
+
+```
+
+
+## Baseline and Peak data for individual cells
 ```{r plot-baseline-and-peak, echo = FALSE}
-# prelimFigs <- list()
+source("plotBasePeak.R")
+
 for (cell in unique(allData$combined$data.frame)){
-  pname <- paste(cell, "Plot", sep = '')
-  assign(pname, plotBasePeak(data = as.data.frame(allData[[cell]]),
-                             plotTitle = cell))
-  #print(plotBasePeak(as.data.frame(allData[[cell]])))
+  #pname <- paste(cell, "Plot", sep = '')
+  #assign(pname, plotBasePeak(data = as.data.frame(allData[[cell]]),
+                             #plotTitle = cell))
+  print(plotBasePeak(as.data.frame(allData[[cell]]), 
+                     plotTitle = cell))
 }
 
 ```

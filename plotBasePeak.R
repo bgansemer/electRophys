@@ -1,4 +1,4 @@
-plotBasePeak <- function(data, plotTitle, size = 3 , cols = c("black", "magenta")) {
+plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta")) {
   
   #' Generate plots showing baseline amplitude and uncorrected ePSC amplitude.
   #' @description Generates separate plots for pre- and post-depolarization.
@@ -34,31 +34,33 @@ plotBasePeak <- function(data, plotTitle, size = 3 , cols = c("black", "magenta"
   prePlot <- ggplot(data, aes(x = Time)) +
     geom_point(aes(y = PreBaselineAmp, color = "Prestim Baseline"), size = size) +
     geom_point(aes(y = UncorPrePeak, color = "ePSC Peak"), shape = 17, size = size) +
-    labs(title = "pre-depolarization", x = NULL, y = "amplitude (pA)", 
+    labs(title = "pre-depolarization", x = NULL, y = "\namplitude (pA)",
          color = "Legend") +
     geom_line(aes(y = 0), linetype = "dashed", size = 1) +
     theme_BG() +
     scale_color_manual(values = lgnd) +
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                        expand = expansion(mult = c(0,0), add = c(1,2))) +
-    scale_y_continuous(limits = c(minY, maxY), 
+    scale_y_continuous(limits = c(minY, maxY),
                        breaks = seq(0, minY, -10),
                        expand = c(0, 0))
+
   
   # generate post-depolarization plot
   postPlot <- ggplot(data, aes(x = Time)) +
     geom_point(aes(y = PostBaselineAmp, color = "Prestim Baseline"), size = size) +
     geom_point(aes(y = UncorPostPeak, color = "ePSC Peak"), shape = 17, size = size) +
-    labs(title = "post-depolarization", x = NULL, y = NULL, 
+    labs(title = "post-depolarization", x = NULL, y = NULL,
          color = "Legend") +
     geom_line(aes(y = 0), linetype = "dashed", size =1 ) +
     theme_BG() +
     scale_color_manual(values = lgnd) +
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                        expand = expansion(mult = c(0,0), add = c(1,2))) +
-    scale_y_continuous(limits = c(minY, maxY), 
+    scale_y_continuous(limits = c(minY, maxY),
                        breaks = seq(0, minY, -10),
                        expand = c(0,0))
+  
   
   # plot baseline corrected ePSC amplitude
   preCorPlot <- ggplot(data, aes(x = Time, y = PrePeakAmp, 
@@ -87,6 +89,7 @@ plotBasePeak <- function(data, plotTitle, size = 3 , cols = c("black", "magenta"
                        breaks = seq(0, minY, -10),
                        expand = c(0, 0))
   
+  # uses cowplot. may try patchwork instead to improve spacing
   # combine plots into one grid
   tempPlot <- plot_grid(prePlot + theme(legend.position = "none"),
                         postPlot + theme(legend.position = "none"),
@@ -94,6 +97,16 @@ plotBasePeak <- function(data, plotTitle, size = 3 , cols = c("black", "magenta"
                         postCorPlot + theme(legend.position = "none"),
                         align = "vh", hjust = -1,
                         nrow = 2, ncol = 2)
+  
+  row1 <- plot_grid(prePlot + theme(legend.position = "none"),
+                    postPlot + theme(legend.position = "none"),
+                    align = "vh", hjust = -1,
+                    ncol = 2)
+  
+  row2 <- plot_grid(preCorPlot + theme(legend.position = "none"),
+                    postCorPlot + theme(legend.position = "none"),
+                    align = "vh", hjust = -1,
+                    ncol = 2)
   
                        
   
@@ -103,9 +116,9 @@ plotBasePeak <- function(data, plotTitle, size = 3 , cols = c("black", "magenta"
                       guides(color = guide_legend(nrow = 1)) +
                       theme(legend.position = "bottom"))
   
-  BPplot <- plot_grid(title, tempPlot, leg,
-                      ncol = 1,
-                      rel_heights = c(0.1, 1, 0.1))
+  BPplot <- plot_grid(title, row1, row2, leg,
+                      ncol = 1, align = "v", axis = "l",
+                      rel_heights = c(0.1, 1, 1, 0.1))
   
-  return(BPplot)
+  BPplot
 }
