@@ -17,6 +17,7 @@ library(ggplot2)
 library(dplyr)
 library(cowplot)
 library(gridExtra)
+library(writexl)
 ```
 
 ```{r source, include = FALSE}
@@ -51,7 +52,36 @@ allData <- dseR("./example-data/pre-depol-data.atf",
              numSweeps = 60, preAvg = 15, postAvg = 2)
 ```
 
-## Prestimulus baseline amplitude for all cells
+### Save data to spreadsheets
+```{r save-data, results = "hide"}
+# specify output directory
+outDir <- "./results/"
+
+# specify name of experiment (example: 20220805-DSE)
+expName <- "example-results"
+
+# write file of calculated % DSE for individual sweeps
+combinePerc <- data.frame(Sweep = allData$Cell1$Sweep, 
+                          Time = allData$Cell1$Time)
+combinePerc <- cbind(combinePerc, 
+                     allData$preDepolPerc[,!names(allData$preDepolPerc) %in% 
+                                  c("avgPerc", "percSE")])
+
+combinePerc <- cbind(combinePerc, 
+                     allData$postDepolPerc[,!names(allData$postDepolPerc)
+                                           %in% c("avgPerc", "percSE")])
+
+write_xlsx(combinePerc, path = paste(outDir, expName, "_percDSE.xlsx", 
+                                     sep = ''))
+
+# write files for all data
+lapply(names(allData), function(x) {
+  write_xlsx(allData[[x]], 
+             path = paste(outDir, expName, "_", x, ".xlsx", sep = ''))
+})
+```
+
+### Prestimulus baseline amplitude for all cells
 ```{r plot-baseline, echo = FALSE}
 combinedData <- as.data.frame(allData$combined)
 
@@ -104,7 +134,7 @@ basePlotGrid
 ```
 
 
-## Baseline and Peak data for individual cells
+### Baseline and Peak data for individual cells
 ```{r plot-baseline-and-peak, echo = FALSE}
 source("plotBasePeak.R")
 
@@ -116,4 +146,42 @@ for (cell in unique(allData$combined$data.frame)){
                      plotTitle = cell))
 }
 
+```
+
+### Plot percent ePSC amplitude
+```{r, plot-perc-inhibition, echo = FALSE, fig.align = "center", fig.cap = "ePSC amplitude as percent baseline", fig.height = 4, fig.width = 5}
+# may just add this to dseR
+preAvg <- 15 #needs to be same as preAvg for calling dseR
+
+# organize data for plotting
+totalSweeps <- 1:(length(allData$Cell1$Sweep)+preAvg)
+totalTime <- (totalSweeps-1)*1.99998
+
+# create vector of all percent amplitudes
+# start with getting pre depolarization numbers
+percAmpAvg <- tail(allData$preDepolPerc$avgPerc, preAvg) 
+percAmpSE <- tail(allData$preDepolPerc$percSE, preAvg)
+
+# append post depolarization numbers
+percAmpAvg <- c(percAmpAvg, allData$postDepolPerc$avgPerc)
+percAmpSE <- c(percAmpSE, allData$postDepolPerc$percSE)
+
+# create dataframe
+plotPercData <- data.frame(Time = totalTime, percentAmplitude = percAmpAvg,
+                           SE = percAmpSE)
+
+percAmpPlot <- ggplot(data = plotPercData, 
+                      aes(x = Time, y = percentAmplitude)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = percentAmplitude-SE, 
+                    ymax = percentAmplitude+SE),
+                width = 2, position = position_dodge(0.05)) +
+  scale_x_continuous(limits = c(0, 150), breaks = seq(0, 150, 30),
+                     expand = expansion(mult = c(0,0), add = c(1,2))) +
+  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 25), 
+                     expand = c(0, 0)) +
+  labs(x = "Time (s)", y = "ePSC amplitude (%)") +
+  theme_BG()
+
+percAmpPlot
 ```

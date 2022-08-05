@@ -30,6 +30,7 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
   # load in required libraries
   #library(ggplot2)
   library(dplyr)
+  library(matrixStats)
   
   # read in the peak data and store as separate dataframes
   preData <- as.data.frame(read.delim(preFile, header = T, skip = 2))
@@ -49,24 +50,6 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
   # get filenames
   fNamesPre <- unique(preData$FileName)
   fNamesPost <- unique(postData$FileName)
-  
-  # preList <- list()
-  # postList <- list()
-  # 
-  # # may need to add "pre" and "post" to cell names to avoid confusion
-  # for (i in 1:length(fNamesPre)){
-  #   templist <- preData[preData$FileName == fNamesPre[i],]
-  #   templist$Time <- templist$Time/1000 # convert time to s instead of ms
-  #   cName <- paste("PreCell", as.character(i), sep = '')
-  #   preList[[cName]] <- templist
-  # }
-  # 
-  # for (i in 1:length(fNamesPost)){
-  #   templist <- postData[postData$FileName == fNamesPost[i],]
-  #   templist$Time <- templist$Time/1000 # convert time to s instead of ms
-  #   cName <- paste("PostCell", as.character(i), sep = '')
-  #   postList[[cName]] <- templist
-  # }
   
   # create merged dataframe for each cell
   rawData <- list()
@@ -114,7 +97,9 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
     ePSCdse <- append(ePSCdse, dse)
   }
   
-  calcData$DSE <- ePSCdse
+  calcData$ePSC_DSE <- ePSCdse
+  
+  calcData$DSE_Percent <- (calcData$ePSC_DSE/calcData$ePSCbaseline)*100
   
   # calculate ePSC amplitude % baseline
   for (cl in allCells){
@@ -124,19 +109,47 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
                                          calcData$ePSCbaseline[which(calcData$cellNames == cl)])*100
   }
   
-  # merge all raw data again after calculating $ amplitude
+  # merge all raw data again after calculating % amplitude
   combinedData <- bind_rows(rawData, .id = "data.frame")
+
+  # calculate averages for plotting
+  # generate pre-depolarization percent baseline dataframe
+  preDepolPerc <- data.frame(matrix(nrow = numSweeps, ncol = length(allCells)))
+  colnames(preDepolPerc) <- allCells
+  
+  # same for post-depol
+  postDepolPerc <- data.frame(matrix(nrow = numSweeps, ncol = length(allCells)))
+  colnames(postDepolPerc) <- allCells
+  
+  # dataframes with data
+  for (cell in allCells){
+    preDepolPerc[[cell]] <- rawData[[cell]]$percBaselinePre
+    postDepolPerc[[cell]] <- rawData[[cell]]$percBaselinePost
+  }
+  
+  # average percents and st dev for all cells
+  preAvg <- rowMeans(preDepolPerc)
+  postAvg <- rowMeans(postDepolPerc)
+  preSE <- rowSds(data.matrix(preDepolPerc, rownames.force = NA))/sqrt(length(allCells))
+  postSE <- rowSds(data.matrix(postDepolPerc, rownames.force = NA))/sqrt(length(allCells))
+
+  
+  preDepolPerc$avgPerc <- preAvg
+  postDepolPerc$avgPerc <- postAvg
+  preDepolPerc$percSE <- preSE
+  postDepolPerc$percSE <- postSE
+  
+  # combine all data into a list for returing out
+  allData <- rawData
+  allData$combined <- combinedData
+  allData$calcData <- calcData
+  allData$preDepolPerc <- preDepolPerc
+  allData$postDepolPerc <- postDepolPerc
   
   # generate generic plots
   if (returnPlots == T){
     #graph code here
   }
-
-  
-  
-  allData <- rawData
-  allData$combined <- combinedData
-  allData$calcData <- calcData
   
   return(allData)
   
