@@ -1,11 +1,9 @@
 ---
-title: "Add experiment title here"
+title: "DSE testing"
 author: "Benjamin Gansemer"
 date: "`r Sys.Date()`"
 output:
-  pdf_document: default
-  html_document:
-    df_print: paged
+  html_document: default
 ---
 
 ```{r setup, include = FALSE}
@@ -23,6 +21,10 @@ library(writexl)
 ```{r source, include = FALSE}
 source("dseR.R")
 source("plotBasePeak.R")
+source("plotDSE.R")
+
+# comments for improvements 
+# need to make the report more organized and reduce white space caused by plots
 
 ```
 
@@ -47,18 +49,27 @@ theme_BG <- function(base_size = 14){
 
 ### Import data
 ```{r run-dseR}
-allData <- dseR("./example-data/pre-depol-data.atf", 
-             "./example-data/post-depol-data.atf",
-             numSweeps = 60, preAvg = 15, postAvg = 2)
+wkDir <- "C:/Users/benja/Documents/Postdoc/Data/DSE-testing/20220809_DSE"
+
+setwd(wkDir)
+
+allData <- dseR("./20220809_pre-depol.atf", 
+              "./20220809_post-depol.atf",
+              numSweeps = 60, preAvg = 15, postAvg = 3)
+
+# allData <- dseR("./example-data/pre-depol-data.atf", 
+#              "./example-data/post-depol-data.atf",
+#              numSweeps = 60, preAvg = 15, postAvg = 3)
 ```
 
 ### Save data to spreadsheets
 ```{r save-data, results = "hide"}
 # specify output directory
-outDir <- "./results/"
+outDir <- paste(wkDir, "/results/", sep = '')
+#outDir <- "./results/"
 
 # specify name of experiment (example: 20220805-DSE)
-expName <- "example-results"
+expName <- "example_results"
 
 # write file of calculated % DSE for individual sweeps
 combinePerc <- data.frame(Sweep = allData$Cell1$Sweep, 
@@ -99,7 +110,7 @@ preBaselinePlot <- ggplot(combinedData,
   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                      expand = c(0,0)) +
   scale_y_continuous(limits = c(minBaseline, maxBaseline),
-                     breaks = seq(minBaseline, maxBaseline, 10),
+                     breaks = seq(minBaseline, maxBaseline, 50),
                      expand = c(0,0))
 
 postBaselinePlot <- ggplot(combinedData,
@@ -112,7 +123,7 @@ postBaselinePlot <- ggplot(combinedData,
   scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                      expand = c(0,0)) +
   scale_y_continuous(limits = c(minBaseline, maxBaseline),
-                     breaks = seq(minBaseline, maxBaseline, 10),
+                     breaks = seq(minBaseline, maxBaseline, 50),
                      expand = c(0,0))
 
 ```
@@ -147,10 +158,25 @@ for (cell in unique(allData$combined$data.frame)){
 }
 
 ```
+### Plot perscent ePSC amplitude for each cell
+```{r, plot-perc-inhibition, echo = FALSE}
 
-### Plot percent ePSC amplitude
-```{r, plot-perc-inhibition, echo = FALSE, fig.align = "center", fig.cap = "ePSC amplitude as percent baseline", fig.height = 4, fig.width = 5}
+
+for (cell in unique(allData$combined$data.frame)){
+  print(plotDSE(as.data.frame(allData[[cell]]), 
+                plotTitle = cell, preAvg = 15)) 
+}
+
+
+```
+
+### Plot average percent ePSC amplitude
+```{r, plot-avg-perc-inhibition, echo = FALSE, fig.align = "center", fig.cap = "ePSC amplitude as percent baseline", fig.height = 4, fig.width = 5}
 # may just add this to dseR
+# might create new script to make a separate plot for each
+# individual cell, then plot the average at the end.
+# may allow for better identification of which cells
+# have DSE and which don't. 
 preAvg <- 15 #needs to be same as preAvg for calling dseR
 
 # organize data for plotting
@@ -185,3 +211,4 @@ percAmpPlot <- ggplot(data = plotPercData,
 
 percAmpPlot
 ```
+

@@ -42,7 +42,7 @@ plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta"
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                        expand = expansion(mult = c(0,0), add = c(1,2))) +
     scale_y_continuous(limits = c(minY, maxY),
-                       breaks = seq(0, minY, -10),
+                       breaks = seq(0, minY, -50),
                        expand = c(0, 0))
 
   
@@ -58,7 +58,7 @@ plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta"
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                        expand = expansion(mult = c(0,0), add = c(1,2))) +
     scale_y_continuous(limits = c(minY, maxY),
-                       breaks = seq(0, minY, -10),
+                       breaks = seq(0, minY, -50),
                        expand = c(0,0))
   
   
@@ -73,7 +73,7 @@ plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta"
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                        expand = expansion(mult = c(0,0), add = c(1,2))) +
     scale_y_continuous(limits = c(minY, 0), 
-                       breaks = seq(0, minY, -10),
+                       breaks = seq(0, minY, -50),
                        expand = c(0, 0))
   
   # could potentially add baseline ePSC amplitude as a line
@@ -86,7 +86,7 @@ plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta"
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
                        expand = expansion(mult = c(0,0), add = c(1,2))) +
     scale_y_continuous(limits = c(minY, 0), 
-                       breaks = seq(0, minY, -10),
+                       breaks = seq(0, minY, -50),
                        expand = c(0, 0))
   
   # uses cowplot. may try patchwork instead to improve spacing
