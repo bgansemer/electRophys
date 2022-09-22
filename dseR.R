@@ -99,7 +99,7 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
   
   calcData$ePSC_DSE <- ePSCdse
   
-  calcData$DSE_Percent <- (calcData$ePSC_DSE/calcData$ePSCbaseline)*100
+  calcData$DSE_Percent <- ((calcData$ePSCbaseline-calcData$ePSC_DSE)/calcData$ePSCbaseline)*100
   
   # calculate ePSC amplitude % baseline
   for (cl in allCells){

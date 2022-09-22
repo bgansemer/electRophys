@@ -13,7 +13,7 @@ plotDSE <- function(data, plotTitle, preAvg) {
   #' 
   
   totalSweeps <- 1:(length(data$Sweep)+preAvg)
-  totalTime <- (totalSweeps-1)*1.99998
+  totalTime <- (totalSweeps)*1.99998
   
   percAmp <- tail(data$percBaselinePre, preAvg)
   percAmp <- append(percAmp, data$percBaselinePost)
