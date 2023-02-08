@@ -1,7 +1,7 @@
 plotTraces <- function(data, xMin=190, xMax=240, yMin=NULL, yMax=50, 
-                       lineSize = 1, colrs = c("black", "red")) {
+                       lineSize = 1, colrs = NULL, lgnd = FALSE) {
   
-  #' Generates a line plot of electrophysiology trace data. 
+  #' Generates a line plot of electrophysiology trace data.
   #' @description Generates a single plot containing all traces in provided data.
   #' Current use is for a plot comparing two traces, one control/baseline and
   #' one treatment/after stimulus or drug exposure. Future developments may 
@@ -16,6 +16,7 @@ plotTraces <- function(data, xMin=190, xMax=240, yMin=NULL, yMax=50,
   #' @param yMax Maximum y value for the plot.
   #' @param lineSize Size of line.
   #' @param colrs Character vector of colors. Can be accepted color names or hexadecimal.
+  #' @param lgnd Boolean. Specifies whether a legend should be included.
   #' 
   #' @examples provide example here when code is finished.
   #' 
@@ -65,11 +66,9 @@ plotTraces <- function(data, xMin=190, xMax=240, yMin=NULL, yMax=50,
   }
 
   if (is.null(yMin)) {
-    #yMin <- min(traceData[,-1])
-    # begin <- min(which(round(traceData$traces)==196))
-    # end <- max(which(round(traceData$traces)==220))
-    # yMin <- round_any(min(traceData$traces[begin:end, -1]), 25, floor)
-    yMin <- -150
+    begin <- min(which(round(inputData[,1])==196))
+    end <- max(which(round(inputData[,1])==220))
+    yMin <- round_any(min(inputData[begin:end, -1]), 25, floor)
   }
 
   if (is.null(yMax)) {
@@ -77,9 +76,17 @@ plotTraces <- function(data, xMin=190, xMax=240, yMin=NULL, yMax=50,
     yMax <- 50
   }
 
+  # generate color palette if colors are not provided
+  # palette from http://www.cookbook-r.com/Graphs/Colors_(ggplot2)/#a-colorblind-friendly-palette
+  cbPal <- c("#000000", "#FF6300", "#660099","#009E73", "#56B4E9", "#F0E442", "#0072B2", "#E69F00", "#CC79A7")
+  if (is.null(colrs)) {
+    colrs <- cbPal
+  }
+  
   # generate plot using ggplot2
-  tracePlot <- ggplot(data = traceData, aes(x = timeMS, y = traces, col = traceName)) +
-    geom_line(size = lineSize) +
+  tracePlot <- ggplot(data = traceData, 
+                      aes(x = timeMS, y = traces, col = traceName)) +
+    geom_line(size = lineSize, show.legend = lgnd) +
     coord_cartesian(xlim = c(xMin, xMax), ylim = c(yMin, yMax),
                     expand = FALSE) +
     scale_x_continuous(breaks = seq(xMin, xMax, 5)) +

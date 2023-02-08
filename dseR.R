@@ -139,17 +139,12 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
   preDepolPerc$percSE <- preSE
   postDepolPerc$percSE <- postSE
   
-  # combine all data into a list for returing out
+  # combine all data into a list for returning out
   allData <- rawData
   allData$combined <- combinedData
   allData$calcData <- calcData
   allData$preDepolPerc <- preDepolPerc
   allData$postDepolPerc <- postDepolPerc
-  
-  # generate generic plots
-  if (returnPlots == T){
-    #graph code here
-  }
   
   return(allData)
   
