@@ -1,5 +1,5 @@
-dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
-                 returnPlots = F){
+dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postStart = 1, 
+                 postAvg = 2, returnPlots = F){
   
   #' Calculate depolarization-induced suppression of evoked postsynaptic currents
   #' 
@@ -16,8 +16,9 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
   #' depol trials.
   #' @param preAvg number of sweeps prior to depolarization to average to calculate
   #' baseline amplitude.
-  #' @param postAvg number of sweeps after depolarization to average to calculate 
-  #' DSE/DSI amplitude.
+  #' @param postStart which sweep to start the post depolarization averaging
+  #' @param postAvg which sweep after depolarization to end postdepolarization
+  #' average to calculate DSE/DSI amplitude.
   #' @param returnPlots boolean. Specify whether to return basic plots of the data.
   #' 
   #' @examples 
@@ -92,8 +93,9 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postAvg = 2,
   
   # calculate DSE/DSI ePSC amplitude for each cell
   ePSCdse <- c()
+  
   for (cl in allCells){
-    dse <- mean(head(rawData[[cl]]$PostPeakAmp, postAvg))
+    dse <- mean(rawData[[cl]]$PostPeakAmp[postStart:postAvg])
     ePSCdse <- append(ePSCdse, dse)
   }
   

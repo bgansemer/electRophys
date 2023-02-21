@@ -76,9 +76,9 @@ postFile <- jchoose.files(default = wkDir, caption = "Select post-depolarization
 
 ```{r run-dseR, warning = FALSE}
 #run dseR to get data
-allData <- dseR(preFile, 
-              postFile,
-              numSweeps = 60, preAvg = 15, postAvg = 5)
+allData <- dseR(preFile, postFile,
+              numSweeps = 60, preAvg = 15, 
+              postStart = 2, postAvg = 5)
 ```
 
 ### Save data to spreadsheets
