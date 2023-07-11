@@ -1,8 +1,8 @@
 workDir <- "C:/Users/benja/Documents/Postdoc/Data/ephys/"
-resultsDir <- "Pic4AP-DSE/20230215-pic4ap-3h/results/"
+resultsDir <- "Tat/20230606-Tat-gp120/results/"
 outDir <- paste0(workDir, resultsDir)
 #outDir <- "C:/Users/benja/Desktop/temp/"
-expName <- "230215-DSE-pic4ap-3h"
+expName <- "230606-control"
 
 rmarkdown::render(input = "R-DSE_markdown.Rmd",
                   output_file = paste0(outDir, expName, "_report", ".html"),

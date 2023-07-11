@@ -1,5 +1,5 @@
 ---
-title: "02/15/23 - DSE Pic4AP-3h"
+title: "`r Sys.Date()` - Control DSE"
 author: "Benjamin Gansemer"
 date: "`r Sys.Date()`"
 
@@ -32,13 +32,13 @@ source("plotDSE.R")
 
 ```{r get-info, include = FALSE}
 #can set default/starting directory here
-wkDir <- "C:\\Users\\benja\\Documents\\Postdoc\\Data\\ephys\\Pic4AP-DSE\\"
+wkDir <- "C:\\Users\\benja\\Documents\\Postdoc\\Data\\ephys\\"
 
 #choose output directory
 outDir <- jchoose.dir(default = wkDir, "Select output directory")
 
 # specify name of experiment (example: 20220805-DSE)
-expName <- "230215-DSE-pic4ap-3h"
+expName <- "230606-control"
 
 #renderRmd(outDir, expName)
 
