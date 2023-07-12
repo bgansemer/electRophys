@@ -1,10 +1,9 @@
 ---
-title: "`r Sys.Date()` - Control DSE"
-author: "Benjamin Gansemer"
-date: "`r Sys.Date()`"
-
+params:
+  workDir: "initDir"
+  outputDir: "resDir"
+  expTitle: "exp"
 ---
-
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(message = FALSE, fig.height = 5)
 ```
@@ -17,6 +16,7 @@ library(gridExtra)
 library(writexl)
 library(rJava)
 library(rChoiceDialogs)
+library(svDialogs)
 ```
 
 ```{r source, include = FALSE}
@@ -31,18 +31,22 @@ source("plotDSE.R")
 ```
 
 ```{r get-info, include = FALSE}
-#can set default/starting directory here
-wkDir <- "C:\\Users\\benja\\Documents\\Postdoc\\Data\\ephys\\"
+#set default/starting directory here if desired
+wkDir <- params$workDir
 
 #choose output directory
-outDir <- jchoose.dir(default = wkDir, "Select output directory")
+outDir <- params$outputDir
 
-# specify name of experiment (example: 20220805-DSE)
-expName <- "230606-control"
-
-#renderRmd(outDir, expName)
-
+#get experiment name from render script
+expName <- params$expTitle
 ```
+
+---
+title: `r expName`
+author: "Benjamin Gansemer"
+date: "`r Sys.Date()`"
+
+---
 
 ```{r modify-ggplot-theme, include = FALSE}
 # generate new ggplot theme for plots
@@ -229,12 +233,6 @@ percAmpPlot <- ggplot(data = plotPercData,
   theme_BG()
 
 percAmpPlot
-```
-
-```{r plot-traces, eval = FALSE, include =  FALSE}
-tData <- choose.files(default = "C:/Users/benja/Documents/Postdoc/data/ephys", caption = "Select trace data file", multi = FALSE)
-
-
 ```
 
 ```{r clear-env, include = FALSE}

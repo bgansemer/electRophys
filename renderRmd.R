@@ -1,12 +1,18 @@
-workDir <- "C:/Users/benja/Documents/Postdoc/Data/ephys/"
-resultsDir <- "Tat/20230606-Tat-gp120/results/"
-outDir <- paste0(workDir, resultsDir)
-#outDir <- "C:/Users/benja/Desktop/temp/"
-expName <- "230606-control"
+#set default/starting directory here if desired
+wkDir <- "C:/Users/benja/Documents/Postdoc/Data/ephys/"
+
+#select output directory for all files
+outDir <- jchoose.dir(default = wkDir, "Select output directory")
+
+#get experiment name from user
+expNameDlg <- dlg_input(message = "Enter experiment name")
 
 rmarkdown::render(input = "R-DSE_markdown.Rmd",
-                  output_file = paste0(outDir, expName, "_report", ".html"),
-                  output_format = "html_document")
+                  output_file = paste0(outDir,"/", expNameDlg$res, "_report", ".html"),
+                  output_format = "html_document",
+                  params = list(workDir = wkDir,
+                                outputDir = outDir, 
+                                expTitle = expNameDlg$res))
 
 
 #' renderRmd <- function() {
