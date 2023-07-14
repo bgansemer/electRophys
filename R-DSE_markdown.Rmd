@@ -1,8 +1,10 @@
 ---
+title: "`r expName`"
+date: "`r Sys.Date()`"
 params:
   workDir: "initDir"
   outputDir: "resDir"
-  expTitle: "exp"
+  expTitle: "expTitle"
 ---
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(message = FALSE, fig.height = 5)
@@ -14,57 +16,32 @@ library(dplyr)
 library(cowplot)
 library(gridExtra)
 library(writexl)
-library(rJava)
-library(rChoiceDialogs)
-library(svDialogs)
 ```
 
 ```{r source, include = FALSE}
 source("dseR.R")
 source("plotBasePeak.R")
 source("plotDSE.R")
-#source("renderRmd.R")
-
-# comments for improvements 
-# need to make the report more organized and reduce white space caused by plots
-
+source("theme_BG.R")
 ```
 
-```{r get-info, include = FALSE}
-#set default/starting directory here if desired
+```{r get-info, echo = FALSE}
+#set default/starting directory from params
 wkDir <- params$workDir
 
-#choose output directory
+#get output directory from params
 outDir <- params$outputDir
 
-#get experiment name from render script
+#get experiment name from params
 expName <- params$expTitle
 ```
 
----
-title: `r expName`
-author: "Benjamin Gansemer"
-date: "`r Sys.Date()`"
-
----
-
-```{r modify-ggplot-theme, include = FALSE}
-# generate new ggplot theme for plots
-theme_BG <- function(base_size = 14){
-  theme_bw(base_size = base_size) %+replace%
-    theme(
-      plot.title = element_text(size = rel(1), face = "bold",
-                                margin = margin(0,0,5,0),
-                                hjust = 0.5),
-      panel.border = element_blank(),
-      axis.line = element_line(color = "black"),
-      axis.text = element_text(size = rel(0.70)),
-      axis.title = element_text(size = rel(0.85), face = "bold"),
-      legend.title = element_text(size = rel(0.7)),
-      legend.text = element_text(size = rel(0.6)),
-    )
-
-}
+### Parameters
+```{r print-params, echo = FALSE}
+#print variables to rmd
+print(paste("working directory:", wkDir))
+print(paste("output directory:", outDir))
+print(paste("experiment name:", expName))
 
 ```
 
@@ -76,6 +53,11 @@ preFile <- jchoose.files(default = wkDir, caption = "Select pre-depolarization f
 postFile <- jchoose.files(default = wkDir, caption = "Select post-depolarization file",
                         multi = FALSE)
 
+```
+
+```{r files-used}
+preFile
+postFile
 ```
 
 ```{r run-dseR, warning = FALSE}
@@ -182,59 +164,25 @@ for (cell in unique(allData$combined$data.frame)){
 ```
 
 ### Plot perscent ePSC amplitude for each cell
-```{r plot-perc-inhibition, echo = FALSE}
+```{r plot-perc-inhibition, echo = FALSE, fig.align = "left", fig.width = 6}
 
 
 for (cell in unique(allData$combined$data.frame)){
   print(plotDSE(as.data.frame(allData[[cell]]), 
-                plotTitle = cell, preAvg = 15)) 
+                plotTitle = cell, preAvg = 15,
+                ptSize = 2, errorBars = "None")) 
 }
 
 
 ```
 
 ### Plot average percent ePSC amplitude
-```{r plot-avg-perc-inhibition, echo = FALSE, fig.align = "center", fig.cap = "ePSC amplitude as percent baseline", fig.height = 4, fig.width = 5}
-# may just add this to dseR
-# might create new script to make a separate plot for each
-# individual cell, then plot the average at the end.
-# may allow for better identification of which cells
-# have DSE and which don't. 
-preAvg <- 15 #needs to be same as preAvg for calling dseR
+```{r plot-avg-perc-inhibition, echo = FALSE, fig.align = "left", fig.cap = "ePSC amplitude as percent baseline", fig.height = 6, fig.width = 7}
 
-# organize data for plotting
-totalSweeps <- 1:(length(allData$Cell1$Sweep)+preAvg)
-totalTime <- (totalSweeps-1)*1.99998
-
-# create vector of all percent amplitudes
-# start with getting pre depolarization numbers
-percAmpAvg <- tail(allData$preDepolPerc$avgPerc, preAvg) 
-percAmpSE <- tail(allData$preDepolPerc$percSE, preAvg)
-
-# append post depolarization numbers
-percAmpAvg <- c(percAmpAvg, allData$postDepolPerc$avgPerc)
-percAmpSE <- c(percAmpSE, allData$postDepolPerc$percSE)
-
-# create dataframe
-plotPercData <- data.frame(Time = totalTime, percentAmplitude = percAmpAvg,
-                           SE = percAmpSE)
-
-percAmpPlot <- ggplot(data = plotPercData, 
-                      aes(x = Time, y = percentAmplitude)) +
-  geom_point() +
-  geom_errorbar(aes(ymin = percentAmplitude-SE, 
-                    ymax = percentAmplitude+SE),
-                width = 2, position = position_dodge(0.05)) +
-  scale_x_continuous(limits = c(0, 150), breaks = seq(0, 150, 30),
-                     expand = expansion(mult = c(0,0), add = c(1,2))) +
-  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, 25), 
-                     expand = c(0, 0)) +
-  labs(x = "Time (s)", y = "ePSC amplitude (%)") +
-  theme_BG()
+#can change errorBars to std_dev if desired
+percAmpPlot <- plotDSE(as.data.frame(allData$allAvgData), 
+                plotTitle = "", preAvg = 15,
+                ptSize = 3, errorBars = "std_error")
 
 percAmpPlot
-```
-
-```{r clear-env, include = FALSE}
-rm(list = ls())
 ```

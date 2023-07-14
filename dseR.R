@@ -134,12 +134,25 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postStart = 1,
   postAvg <- rowMeans(postDepolPerc)
   preSE <- rowSds(data.matrix(preDepolPerc, rownames.force = NA))/sqrt(length(allCells))
   postSE <- rowSds(data.matrix(postDepolPerc, rownames.force = NA))/sqrt(length(allCells))
+  preSD <- rowSds(data.matrix(preDepolPerc, rownames.force = NA))
+  postSD <- rowSds(data.matrix(postDepolPerc, rownames.force = NA))
 
+  preDepolPerc$preAvgPerc <- preAvg
+  postDepolPerc$postAvgPerc <- postAvg
+  preDepolPerc$prePercSE <- preSE
+  postDepolPerc$postPercSE <- postSE
+  preDepolPerc$prePercSD <- preSD
+  postDepolPerc$postPercSD <- postSD
   
-  preDepolPerc$avgPerc <- preAvg
-  postDepolPerc$avgPerc <- postAvg
-  preDepolPerc$percSE <- preSE
-  postDepolPerc$percSE <- postSE
+  #combine avg data for easier plotting later
+  allAvgData <- data.frame(Sweep = rawData$Cell1$Sweep)
+  #allAvgData$Sweep <- rawData$Cell1$Sweep
+  allAvgData$percBaselinePre <- preAvg
+  allAvgData$preSE <- preSE
+  allAvgData$preSD <- preSD
+  allAvgData$percBaselinePost <- postAvg
+  allAvgData$postSE <- postSE
+  allAvgData$postSD <- postSD
   
   # combine all data into a list for returning out
   allData <- rawData
@@ -147,6 +160,7 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postStart = 1,
   allData$calcData <- calcData
   allData$preDepolPerc <- preDepolPerc
   allData$postDepolPerc <- postDepolPerc
+  allData$allAvgData <- allAvgData
   
   return(allData)
   

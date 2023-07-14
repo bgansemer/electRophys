@@ -36,7 +36,7 @@ plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta"
     geom_point(aes(y = UncorPrePeak, color = "ePSC Peak"), shape = 17, size = size) +
     labs(title = "pre-depolarization", x = NULL, y = "\namplitude (pA)",
          color = "Legend") +
-    geom_line(aes(y = 0), linetype = "dashed", size = 1) +
+    geom_line(aes(y = 0), linetype = "dashed", linewidth = 1) +
     theme_BG() +
     scale_color_manual(values = lgnd) +
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
@@ -52,7 +52,7 @@ plotBasePeak <- function(data, plotTitle, size = 2 , cols = c("black", "magenta"
     geom_point(aes(y = UncorPostPeak, color = "ePSC Peak"), shape = 17, size = size) +
     labs(title = "post-depolarization", x = NULL, y = NULL,
          color = "Legend") +
-    geom_line(aes(y = 0), linetype = "dashed", size =1 ) +
+    geom_line(aes(y = 0), linetype = "dashed", linewidth = 1 ) +
     theme_BG() +
     scale_color_manual(values = lgnd) +
     scale_x_continuous(limits = c(0, 120), breaks = seq(0, 120, 15),
