@@ -1,5 +1,5 @@
 dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postStart = 1, 
-                 postAvg = 2, returnPlots = F){
+                 postAvg = 2){
   
   #' Calculate depolarization-induced suppression of evoked postsynaptic currents
   #' 
@@ -19,7 +19,6 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postStart = 1,
   #' @param postStart which sweep to start the post depolarization averaging
   #' @param postAvg which sweep after depolarization to end postdepolarization
   #' average to calculate DSE/DSI amplitude.
-  #' @param returnPlots boolean. Specify whether to return basic plots of the data.
   #' 
   #' @examples 
   #'  dseR(preFile = "./path/to/pre-depol.atf", 
@@ -29,17 +28,16 @@ dseR <- function(preFile, postFile, numSweeps, preAvg = 15, postStart = 1,
   #'  
   
   # load in required libraries
-  #library(ggplot2)
-  library(dplyr)
+  library(tidyverse)
   library(matrixStats)
   
   # read in the peak data and store as separate dataframes
-  preData <- as.data.frame(read.delim(preFile, header = T, skip = 2))
-  postData <- as.data.frame(read.delim(postFile, header = T, skip = 2))
+  preData <- as.data.frame(read_delim(preFile, skip = 2, show_col_types = F))
+  postData <- as.data.frame(read_delim(postFile, skip = 2, show_col_types = F))
   
   # remove File.Path column from dataframes
-  preData <- subset(preData, select = -c(File.Path))
-  postData <- subset(postData, select = -c(File.Path))
+  preData <- select(preData, -c("File Path"))
+  postData <- select(postData, -c("File Path"))
   
   # rename columns
   colnames(preData) <- c("FileName", "Sweep", "Time", "PrePeakAmp", "PreBaselineAmp")
